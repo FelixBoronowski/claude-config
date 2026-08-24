@@ -1,0 +1,41 @@
+{
+  "attribution": {
+    "commit": "",
+    "pr": ""
+  },
+  "permissions": {
+    "defaultMode": "auto"
+  },
+  "model": "claude-fable-5[1m]",
+  "fallbackModel": [
+    "claude-sonnet-5"
+  ],
+  "enabledPlugins": {
+    "code-review@claude-plugins-official": false,
+    "code-simplifier@claude-plugins-official": false,
+    "feature-dev@claude-plugins-official": false,
+    "security-guidance@claude-plugins-official": false,
+    "plugin-dev@claude-plugins-official": false,
+    "csharp-lsp@claude-plugins-official": false,
+    "ruby-lsp@claude-plugins-official": false,
+    "frontend-design@claude-plugins-official": false,
+    "claude-code-setup@claude-plugins-official": false
+  },
+  "extraKnownMarketplaces": {},
+  "effortLevel": "medium",
+  "modelSettings": {
+    "claude-fable-5": {
+      "effortLevel": "high"
+    }
+  },
+  "autoCompactWindow": 500000,
+  "voice": {
+    "enabled": true,
+    "mode": "hold"
+  },
+  "skipDangerousModePermissionPrompt": true,
+  "skipWorkflowUsageWarning": true,
+  "inputNeededNotifEnabled": false,
+  "skipAutoPermissionPrompt": true,
+  "voiceEnabled": true
+}
