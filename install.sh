@@ -22,6 +22,7 @@ link() {
 link settings.json
 link CLAUDE.md
 link hooks
+link agents
 
 # Machine-specific settings (absolute paths etc.) live in settings.local.json,
 # which is NOT tracked in the repo. Create it with the statusline config if missing.

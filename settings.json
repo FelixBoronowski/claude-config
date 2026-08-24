@@ -19,7 +19,8 @@
     "csharp-lsp@claude-plugins-official": false,
     "ruby-lsp@claude-plugins-official": false,
     "frontend-design@claude-plugins-official": false,
-    "claude-code-setup@claude-plugins-official": false
+    "claude-code-setup@claude-plugins-official": false,
+    "mattpocock-skills@claude-plugins-official": true
   },
   "extraKnownMarketplaces": {},
   "effortLevel": "medium",

@@ -34,6 +34,7 @@ function Install-Item([string]$Name) {
 Install-Item "settings.json"
 Install-Item "CLAUDE.md"
 Install-Item "hooks"
+Install-Item "agents"
 
 # Machine-specific settings (absolute paths etc.) live in settings.local.json,
 # which is NOT tracked in the repo. Create it with the statusline config if missing.

@@ -249,6 +249,11 @@ function getContextBar(remaining) {
   return renderContextBar(used);
 }
 
+// "model" or "model · effort" (colored). Shared by the main line and subagent rows.
+function renderModelEffort(model, effort) {
+  return effort ? `${model}${getEffortColor(effort)} · ${effort}${colors.reset}` : model;
+}
+
 // Render a compact usage segment from raw data: "<label><pct> ↺ <countdown>"
 // (e.g. "H81 ↺ 2h21m") — no bar. Called on every read (live or cached) so the reset
 // countdown is always recomputed from resetsAt rather than frozen at fetch time.
@@ -290,12 +295,15 @@ const LEGACY_MODEL_WEEKLY_KEYS = [
   { key: 'seven_day_sonnet', label: 'S' }
 ];
 
-// Build the usage segments from raw entries. fiveHour/weekly are { percentage, resetsAt }
-// or null/absent; models is an array of { label, percentage, resetsAt } (possibly empty).
-// Returns { current, weekly, models } — the first two rendered strings or null, models a
-// (possibly empty) array of rendered strings. Scoped bars use getScopedColor instead of the
-// H/W thresholds, so the full threshold palette stays exclusive to H/W.
-function buildUsageBars(fiveHour, weekly, models) {
+// Build the usage segments from a raw { fiveHour, weekly, models } object — the shared
+// shape both buildUsageFromStdin and parseUsagePayload return. fiveHour/weekly are
+// { percentage, resetsAt } or null/absent; models is an array of { label, percentage,
+// resetsAt } (possibly empty). Returns { current, weekly, models } — the first two
+// rendered strings or null, models a (possibly empty) array of rendered strings. Scoped
+// bars use getScopedColor instead of the H/W thresholds, so the full threshold palette
+// stays exclusive to H/W.
+function buildUsageBars(raw) {
+  const { fiveHour, weekly, models } = raw || {};
   return {
     current: fiveHour ? buildUsageBar('H', fiveHour.percentage, fiveHour.resetsAt) : null,
     weekly: weekly ? buildUsageBar('W', weekly.percentage, weekly.resetsAt) : null,
@@ -344,9 +352,10 @@ function parseScopedLimits(usage) {
 // Build usage bars from stdin `rate_limits` (Claude.ai Pro/Max, present only after the
 // first API response of a session). Same data as the OAuth usage API, so reading it here
 // skips the network/credentials/cache path entirely. `resets_at` is a Unix epoch in
-// SECONDS (not ISO) — ×1000 before Date. Returns raw { fiveHour, weekly } entries, or null
-// when rate_limits is absent or the required five_hour segment is unusable (caller falls
-// back). Model-scoped weekly limits are never present here — see LEGACY_MODEL_WEEKLY_KEYS.
+// SECONDS (not ISO) — ×1000 before Date. Returns raw { fiveHour, weekly, models } — same
+// shape as parseUsagePayload — or null when rate_limits is absent or the required
+// five_hour segment is unusable (caller falls back). models is always [] here: model-scoped
+// weekly limits are never present in stdin — see LEGACY_MODEL_WEEKLY_KEYS.
 function buildUsageFromStdin(data) {
   const rl = data?.rate_limits;
   if (!rl) return null;
@@ -369,7 +378,29 @@ function buildUsageFromStdin(data) {
 
   const fiveHour = toEntry(rl.five_hour);
   if (!fiveHour) return null;          // five_hour is the required bar
-  return { fiveHour, weekly: toEntry(rl.seven_day) };
+  return { fiveHour, weekly: toEntry(rl.seven_day), models: [] };
+}
+
+// Parse a raw /usage API response body into { fiveHour, weekly, models } — same shape as
+// buildUsageFromStdin — or null on unparseable JSON or a missing/non-finite five_hour
+// utilization (that bar is required). Normalizes utilization first so a missing/non-finite
+// value omits a bar instead of rendering "NaN%". Pure — no fs/network — so it's unit
+// testable directly, unlike getApiUsage which needs a live socket.
+function parseUsagePayload(body) {
+  try {
+    const usage = JSON.parse(body);
+    const fivePct = usage?.five_hour ? normalizePercentage(usage.five_hour.utilization) : null;
+    if (fivePct == null) return null;
+
+    const fiveHour = { percentage: fivePct, resetsAt: usage.five_hour.resets_at || null };
+    const weeklyPct = usage.seven_day ? normalizePercentage(usage.seven_day.utilization) : null;
+    const weekly = weeklyPct != null ? { percentage: weeklyPct, resetsAt: usage.seven_day.resets_at || null } : null;
+    const models = parseScopedLimits(usage);
+
+    return { fiveHour, weekly, models };
+  } catch (e) {
+    return null;
+  }
 }
 
 // Validate a single usage entry ({ percentage, resetsAt }). Returns true only for a
@@ -410,6 +441,15 @@ function readCachedUsage() {
   }
 }
 
+// Serialize usage data into the on-disk cache shape ({ timestamp, data, lastAttempt }). Pure
+// -- no fs -- so setCachedUsage and the test/preview cache seeds all produce exactly the same
+// bytes the real writer would; a reader/writer format mismatch becomes structurally impossible
+// instead of merely untested. `timestamp` defaults to now; tests override it to seed a stale
+// cache. A successful write is itself an attempt, so `lastAttempt` starts equal to `timestamp`.
+function serializeUsageCache(data, timestamp = Date.now()) {
+  return JSON.stringify({ timestamp, data, lastAttempt: timestamp });
+}
+
 // Write usage data to cache (shared across all sessions)
 function setCachedUsage(data) {
   try {
@@ -417,12 +457,41 @@ function setCachedUsage(data) {
       fs.mkdirSync(CACHE_DIR, { recursive: true });
     }
 
-    const cache = {
-      timestamp: Date.now(),
-      data: data
-    };
+    fs.writeFileSync(USAGE_CACHE_FILE, serializeUsageCache(data), 'utf8');
+  } catch (e) {
+    // Silently fail
+  }
+}
 
-    fs.writeFileSync(USAGE_CACHE_FILE, JSON.stringify(cache), 'utf8');
+// Age in ms since the last API attempt (success or failure), or null if none recorded yet.
+// Read directly from the raw file rather than via readCachedUsage so the cooldown still
+// applies when no valid data has ever been cached (every attempt so far has failed).
+function getLastAttemptAge() {
+  try {
+    if (!fs.existsSync(USAGE_CACHE_FILE)) return null;
+    const cache = JSON.parse(fs.readFileSync(USAGE_CACHE_FILE, 'utf8'));
+    if (!cache || !Number.isFinite(cache.lastAttempt) || cache.lastAttempt <= 0) return null;
+    return Date.now() - cache.lastAttempt;
+  } catch (e) {
+    return null;
+  }
+}
+
+// Record that an API attempt is starting, preserving any existing cached data/timestamp so a
+// failed refresh doesn't erase the last successful one. Written before the request so a hang
+// or a process exit mid-request still counts as an attempt for cooldown purposes.
+function recordUsageAttempt() {
+  try {
+    if (!fs.existsSync(CACHE_DIR)) {
+      fs.mkdirSync(CACHE_DIR, { recursive: true });
+    }
+    let existing = null;
+    try {
+      existing = JSON.parse(fs.readFileSync(USAGE_CACHE_FILE, 'utf8'));
+    } catch (e) {}
+    const merged = existing && typeof existing === 'object' ? { ...existing } : {};
+    merged.lastAttempt = Date.now();
+    fs.writeFileSync(USAGE_CACHE_FILE, JSON.stringify(merged), 'utf8');
   } catch (e) {
     // Silently fail
   }
@@ -483,37 +552,10 @@ function getApiUsage(callback) {
 
       res.on('data', chunk => data += chunk);
       res.on('end', () => {
-        try {
-          const usage = JSON.parse(data);
-
-          // 5-hour session usage is required; weekly (seven_day) is rendered when present.
-          // Normalize utilization first so a missing/non-finite value omits the bar
-          // instead of rendering "NaN%" or an out-of-range percentage.
-          const fivePct = usage.five_hour ? normalizePercentage(usage.five_hour.utilization) : null;
-          if (fivePct != null) {
-            const fiveHour = {
-              percentage: fivePct,
-              resetsAt: usage.five_hour.resets_at || null
-            };
-            const weeklyPct = usage.seven_day ? normalizePercentage(usage.seven_day.utilization) : null;
-            const weekly = weeklyPct != null ? {
-              percentage: weeklyPct,
-              resetsAt: usage.seven_day.resets_at || null
-            } : null;
-
-            // Model-scoped weekly limits, rendered only when the account reports them.
-            const models = parseScopedLimits(usage);
-
-            // Cache the raw data (shared across sessions); callers render from it.
-            const resolved = { fiveHour, weekly, models };
-            setCachedUsage(resolved);
-            callback(resolved);
-          } else {
-            callback(null);
-          }
-        } catch (e) {
-          callback(null);
-        }
+        const resolved = parseUsagePayload(data);
+        // Cache the raw data (shared across sessions); callers render from it.
+        if (resolved) setCachedUsage(resolved);
+        callback(resolved);
       });
     });
 
@@ -538,7 +580,17 @@ function getRawUsage(callback) {
     return callback(cached.data);
   }
 
-  // Cache is stale or missing -> refresh from the API.
+  // A refresh (successful or not) was attempted within FRESH_TTL_MS -> still in cooldown,
+  // don't hit the API again. Serve stale cached data if it's still within STALE_TTL_MS, else
+  // nothing. Without this, a repeatedly failing/timing-out refresh would re-hit the API on
+  // every render instead of backing off (issue #41).
+  const attemptAge = getLastAttemptAge();
+  if (attemptAge != null && attemptAge < FRESH_TTL_MS) {
+    return callback(cached && cached.age < STALE_TTL_MS ? cached.data : null);
+  }
+
+  // Cache is stale or missing and no attempt is in cooldown -> refresh from the API.
+  recordUsageAttempt();
   getApiUsage((fresh) => {
     if (fresh) {
       callback(fresh);
@@ -549,20 +601,6 @@ function getRawUsage(callback) {
       callback(null);
     }
   });
-}
-
-// Get usage, cache-first, rendered.
-function getUsageWithCache(callback) {
-  getRawUsage((data) => {
-    callback(data ? buildUsageBars(data.fiveHour, data.weekly, data.models) : null);
-  });
-}
-
-// Model-scoped weekly limits only, cache-first. Used alongside the stdin H/W bars, which
-// can't carry them. Falls back to the stale cache and finally to [] so a failed or slow
-// call costs the scoped bars but never the bars stdin already gave us.
-function getScopedModels(callback) {
-  getRawUsage((data) => callback(data?.models || []));
 }
 
 // Session cost from stdin `cost.total_cost_usd` (USD float, computed client-side by
@@ -604,63 +642,80 @@ function visibleWidth(str) {
 }
 
 // Responsive layout: one line when it fits the terminal, else line1 (identity + context)
-// on top and line2 (usage/cost/task) below. Splits only when COLUMNS is known (Claude Code
-// v2.1.153+) and the single line overflows — unknown width or an empty line2 stays single,
-// so there is no regression on older clients or wide terminals.
-function layout(line1Parts, line2Parts) {
+// on top and line2 (usage/cost/task) below. Splits only when cols is known (Claude Code
+// v2.1.153+ sets COLUMNS, read by collectFacts) and the single line overflows — unknown
+// width or an empty line2 stays single, so there is no regression on older clients or wide
+// terminals.
+function layout(line1Parts, line2Parts, cols) {
   const single = [...line1Parts, ...line2Parts].join(SEGMENT_SEP);
   if (line2Parts.length === 0) return single;
-  const cols = parseInt(process.env.COLUMNS, 10);
   if (Number.isFinite(cols) && cols > 0 && visibleWidth(single) > cols - WIDTH_MARGIN) {
     return line1Parts.join(SEGMENT_SEP) + '\n' + line2Parts.join(SEGMENT_SEP);
   }
   return single;
 }
 
-// Main
-function outputStatus(data, usage) {
+// Gathers everything outputStatus needs that touches fs/child_process/env: git branch +
+// ahead/behind (.git/HEAD, `git rev-list`), the in-progress task (~/.claude/todos), and the
+// terminal width (COLUMNS). Kept separate from renderStatusLine so the render step is pure.
+// Wrapped in its own try/catch (unlike renderStatusLine, it's called outside outputStatus's
+// try/catch in emit()) — a malformed workspace.current_dir (e.g. non-string) can throw from
+// path.basename or resolveGitDir, and this must still degrade to a renderable fallback.
+function collectFacts(data) {
   try {
-    const model = shortenModel(data?.model?.display_name || 'Claude');
     const dir = data?.workspace?.current_dir || process.cwd();
     const dirname = path.basename(dir);
     const branch = DISABLED.has('branch') ? '' : getGitBranch(dir);
     const sync = branch ? formatAheadBehind(getGitAheadBehind(dir)) : '';
-    const effort = DISABLED.has('effort') ? '' : (data?.effort?.level || '');
     const sessionId = data?.session_id || '';
-    const remaining = data?.context_window?.remaining_percentage;
-
-    const contextBar = getContextBar(remaining);
-    const cost = DISABLED.has('cost') ? '' : getCostSegment(data);
     const task = DISABLED.has('task') ? '' : getCurrentTask(sessionId);
+    const cols = parseInt(process.env.COLUMNS, 10);
+    return { dirname, branch, sync, task, cols };
+  } catch (e) {
+    return { dirname: '~', branch: '', sync: '', task: '', cols: undefined };
+  }
+}
 
-    // line1 = identity + context (always); line2 = usage/cost/task (wrap target).
-    const line1 = [];
-    line1.push(branch
-      ? `${dirname} ${colors.dim}⎇ ${branch}${colors.reset}${sync ? ' ' + sync : ''}`
-      : dirname);
-    line1.push(effort ? `${model}${getEffortColor(effort)} · ${effort}${colors.reset}` : model);
-    line1.push(contextBar);
+// Pure: data + facts (see collectFacts) + resolved usage bars -> the rendered line(s).
+// No fs/child_process/network access, so it's callable directly in tests.
+function renderStatusLine(data, facts, usage) {
+  const model = shortenModel(data?.model?.display_name || 'Claude');
+  const effort = DISABLED.has('effort') ? '' : (data?.effort?.level || '');
+  const remaining = data?.context_window?.remaining_percentage;
 
-    const line2 = [];
-    if (usage?.current) line2.push(usage.current);
-    if (usage?.weekly) line2.push(usage.weekly);
-    if (usage?.models?.length) line2.push(...usage.models);
-    if (cost) line2.push(cost);
-    if (task) line2.push(`${colors.dim}${task}${colors.reset}`);
+  const contextBar = getContextBar(remaining);
+  const cost = DISABLED.has('cost') ? '' : getCostSegment(data);
 
-    process.stdout.write(layout(line1, line2));
+  // line1 = identity + context (always); line2 = usage/cost/task (wrap target).
+  const line1 = [];
+  line1.push(facts.branch
+    ? `${facts.dirname} ${colors.dim}⎇ ${facts.branch}${colors.reset}${facts.sync ? ' ' + facts.sync : ''}`
+    : facts.dirname);
+  line1.push(renderModelEffort(model, effort));
+  line1.push(contextBar);
+
+  const line2 = [];
+  if (usage?.current) line2.push(usage.current);
+  if (usage?.weekly) line2.push(usage.weekly);
+  if (usage?.models?.length) line2.push(...usage.models);
+  if (cost) line2.push(cost);
+  if (facts.task) line2.push(`${colors.dim}${facts.task}${colors.reset}`);
+
+  return layout(line1, line2, facts.cols);
+}
+
+// Main
+function outputStatus(data, facts, usage) {
+  try {
+    process.stdout.write(renderStatusLine(data, facts, usage));
   } catch (e) {
     process.stdout.write('Status unavailable');
   }
 }
 
 function outputFallback(usage) {
-  const contextBar = getContextBar(undefined);
-  const parts = ['~', 'Claude', contextBar];
-  if (usage?.current) parts.push(usage.current);
-  if (usage?.weekly) parts.push(usage.weekly);
-  if (usage?.models?.length) parts.push(...usage.models);
-  process.stdout.write(parts.join(' \u2502 '));
+  const facts = { dirname: '~', branch: '', sync: '', task: '', cols: undefined };
+  process.stdout.write(renderStatusLine(null, facts, usage));
 }
 
 // Resolve usage bars for a (possibly null) parsed stdin payload.
@@ -675,14 +730,15 @@ function resolveUsage(data, callback) {
     // stdin covers H and W with no network. Model-scoped weekly limits only exist in the
     // API payload, so they come from the cache — refreshed on the same TTL as every other
     // usage read, which keeps at most one call per FRESH_TTL_MS regardless of render rate.
-    return getScopedModels((models) => {
-      callback(buildUsageBars(fromStdin.fiveHour, fromStdin.weekly, models));
+    // Falls back to the stale cache and finally to [] so a failed or slow call costs only
+    // the scoped bars, never the H/W bars stdin already gave us.
+    return getRawUsage((cached) => {
+      callback(buildUsageBars({ ...fromStdin, models: cached?.models || [] }));
     });
   }
-  getUsageWithCache(callback);
+  getRawUsage((raw) => callback(raw ? buildUsageBars(raw) : null));
 }
 
-// Process with timeout
 // Parse the accumulated stdin into a payload object, or null if empty/unparseable.
 function parseInput(input) {
   if (!input || input.length === 0) return null;
@@ -693,11 +749,34 @@ function parseInput(input) {
   }
 }
 
+// Accumulate stdin then call fn(input) exactly once, on whichever fires first:
+// timeout, 'end', or 'error' (an unhandled stdin error would otherwise throw,
+// breaking the never-throw contract). Shared by both entry points below, which
+// differ only in timeoutMs.
+function readStdinThen(timeoutMs, fn) {
+  let input = '';
+  let finished = false;
+
+  const finish = () => {
+    if (finished) return;
+    finished = true;
+    clearTimeout(timeout);
+    fn(input);
+  };
+
+  const timeout = setTimeout(finish, timeoutMs);
+
+  process.stdin.setEncoding('utf8');
+  process.stdin.on('data', chunk => input += chunk);
+  process.stdin.on('end', finish);
+  process.stdin.on('error', finish);
+}
+
 // Resolve usage for `data` (preferring stdin rate_limits), then render and exit.
 function emit(data) {
   resolveUsage(data, (usage) => {
     if (data) {
-      outputStatus(data, usage);
+      outputStatus(data, collectFacts(data), usage);
     } else {
       outputFallback(usage);
     }
@@ -733,9 +812,7 @@ function renderSubagentTask(t) {
   // effort absent = subagent inherits the session effort; show model alone then.
   const effort = t.effort != null ? String(t.effort) : '';
   if (model) {
-    parts.push(effort
-      ? `${model}${getEffortColor(effort)} · ${effort}${colors.reset}`
-      : model);
+    parts.push(renderModelEffort(model, effort));
   } else if (effort) {
     parts.push(`${getEffortColor(effort)}${effort}${colors.reset}`);
   }
@@ -777,51 +854,17 @@ function emitSubagent(data) {
 // directly (the /usage response shape is the easiest thing here to get wrong, and it
 // can't be reached through stdin). Running the script normally is unchanged.
 if (require.main === module) {
-  if (process.argv[2] === 'subagent') {
-    if (process.stdin.isTTY) {
-      emitSubagent(null);
-    } else {
-      let input = '';
-      let finished = false;
+  const isSubagent = process.argv[2] === 'subagent';
+  const finish = isSubagent ? emitSubagent : emit;
 
-      // Single guarded exit shared by all three triggers: timeout, stdin 'end', and
-      // stdin 'error' (which can fire before 'end' and would otherwise throw unhandled,
-      // breaking the never-throw contract). Whatever accumulated so far gets rendered.
-      const finish = () => {
-        if (finished) return;
-        finished = true;
-        clearTimeout(timeout);
-        emitSubagent(parseInput(input));
-      };
-
-      const timeout = setTimeout(finish, SUBAGENT_TIMEOUT_MS);
-
-      process.stdin.setEncoding('utf8');
-      process.stdin.on('data', chunk => input += chunk);
-      process.stdin.on('end', finish);
-      process.stdin.on('error', finish);
-    }
-  } else if (process.stdin.isTTY) {
-    emit(null);
+  if (process.stdin.isTTY) {
+    finish(null);
   } else {
-    let input = '';
-    let timeoutReached = false;
-
-    const overallTimeout = IS_API_KEY ? 500 : (fs.existsSync(USAGE_CACHE_FILE) ? 1300 : 1600);
-
-    const timeout = setTimeout(() => {
-      timeoutReached = true;
-      emit(parseInput(input));
-    }, overallTimeout);
-
-    process.stdin.setEncoding('utf8');
-    process.stdin.on('data', chunk => input += chunk);
-    process.stdin.on('end', () => {
-      if (timeoutReached) return;
-      clearTimeout(timeout);
-      emit(parseInput(input));
-    });
+    const timeoutMs = isSubagent
+      ? SUBAGENT_TIMEOUT_MS
+      : (IS_API_KEY ? 500 : (fs.existsSync(USAGE_CACHE_FILE) ? 1300 : 1600));
+    readStdinThen(timeoutMs, (input) => finish(parseInput(input)));
   }
 } else {
-  module.exports = { parseScopedLimits, normalizePercentage };
+  module.exports = { parseScopedLimits, parseUsagePayload, serializeUsageCache, normalizePercentage, readStdinThen, renderStatusLine, renderSubagentTask };
 }
