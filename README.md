@@ -25,22 +25,19 @@ copying (no symlink permission), re-run `install.ps1` after pulling.
 
 | File | Purpose |
 |---|---|
-| `settings.json` | Main Claude Code settings (model, permissions, plugins, ...) |
+| `settings.json` | Main Claude Code settings (model, permissions, plugins, statusline, ...) |
 | `CLAUDE.md` | Global instructions applied to every project |
 | `hooks/` | Custom hook scripts (statusline) |
+| `agents/` | Custom subagents (test-runner, ticket-implementer, ticket-implementer-hard) |
+
+The statusline command in `settings.json` uses `~` and forward slashes
+(`node ~/.claude/hooks/statusline.js`), which Claude Code expands portably on
+Linux/WSL and Windows — so it can live in the shared file despite being a path.
+Note: Claude Code does **not** read `~/.claude/settings.local.json`;
+`settings.local.json` only works at the project level (`.claude/` inside a repo).
 
 ## What's machine-local (never in this repo)
 
-`~/.claude/settings.local.json` holds machine-specific overrides — anything with an
-absolute path, like the statusline command. The install script creates it if missing:
-
-```json
-{
-  "statusLine": { "type": "command", "command": "node \"<home>/.claude/hooks/statusline.js\"" },
-  "subagentStatusLine": { "type": "command", "command": "node \"<home>/.claude/hooks/statusline.js\" subagent" }
-}
-```
-
-Also never commit: `~/.claude/.credentials.json`, `~/.claude.json`, `history.jsonl`,
+Never commit: `~/.claude/.credentials.json`, `~/.claude.json`, `history.jsonl`,
 `projects/`, `sessions/`, `plugins/`, `cache/` — these are auth tokens and per-machine
 runtime state.

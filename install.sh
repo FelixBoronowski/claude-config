@@ -24,25 +24,8 @@ link CLAUDE.md
 link hooks
 link agents
 
-# Machine-specific settings (absolute paths etc.) live in settings.local.json,
-# which is NOT tracked in the repo. Create it with the statusline config if missing.
-LOCAL="$CLAUDE_DIR/settings.local.json"
-if [ ! -f "$LOCAL" ]; then
-  cat > "$LOCAL" <<EOF
-{
-  "statusLine": {
-    "type": "command",
-    "command": "node \"$HOME/.claude/hooks/statusline.js\""
-  },
-  "subagentStatusLine": {
-    "type": "command",
-    "command": "node \"$HOME/.claude/hooks/statusline.js\" subagent"
-  }
-}
-EOF
-  echo "created:   $LOCAL"
-else
-  echo "kept:      $LOCAL (make sure it contains the statusLine config, see README)"
-fi
+# NOTE: Claude Code does NOT read ~/.claude/settings.local.json (settings.local.json is
+# project-level only). All shared config, including the statusline command (written with
+# portable "~" + forward slashes), lives in the tracked settings.json.
 
 echo "Done."

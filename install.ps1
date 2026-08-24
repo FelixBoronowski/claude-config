@@ -36,26 +36,8 @@ Install-Item "CLAUDE.md"
 Install-Item "hooks"
 Install-Item "agents"
 
-# Machine-specific settings (absolute paths etc.) live in settings.local.json,
-# which is NOT tracked in the repo. Create it with the statusline config if missing.
-$Local = Join-Path $ClaudeDir "settings.local.json"
-if (-not (Test-Path $Local)) {
-    $statusline = (Join-Path $ClaudeDir "hooks\statusline.js") -replace '\\', '\\'
-    @"
-{
-  "statusLine": {
-    "type": "command",
-    "command": "node \"$statusline\""
-  },
-  "subagentStatusLine": {
-    "type": "command",
-    "command": "node \"$statusline\" subagent"
-  }
-}
-"@ | Set-Content -Path $Local -Encoding UTF8
-    Write-Host "created:   $Local"
-} else {
-    Write-Host "kept:      $Local (make sure it contains the statusLine config, see README)"
-}
+# NOTE: Claude Code does NOT read ~/.claude/settings.local.json (settings.local.json is
+# project-level only). All shared config, including the statusline command (written with
+# portable "~" + forward slashes), lives in the tracked settings.json.
 
 Write-Host "Done."

@@ -30,6 +30,14 @@
     ]
   },
   "model": "claude-fable-5[1m]",
+  "statusLine": {
+    "type": "command",
+    "command": "node ~/.claude/hooks/statusline.js"
+  },
+  "subagentStatusLine": {
+    "type": "command",
+    "command": "node ~/.claude/hooks/statusline.js subagent"
+  },
   "fallbackModel": [
     "claude-sonnet-5"
   ],
