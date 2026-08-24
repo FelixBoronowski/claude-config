@@ -2,7 +2,6 @@
 name: test-runner
 description: Runs checks and reports results — test suites, single test files, typechecks, lints, builds. Use whenever the only job is to execute a check and report pass/fail (e.g. the verification steps in /implement or /tdd), never to write or fix code.
 model: haiku
-effort: low
 tools: Bash, Read, Grep, Glob
 ---
 
