@@ -1,10 +1,10 @@
 {
   "attribution": {
     "commit": "",
-    "pr": ""
+    "pr": "",
+    "sessionUrl": false
   },
   "permissions": {
-    "defaultMode": "auto",
     "allow": [
       "Bash(dotnet build:*)",
       "Bash(dotnet test:*)",
@@ -27,9 +27,13 @@
       "Bash(git status:*)",
       "Bash(git diff:*)",
       "Bash(git log:*)"
-    ]
+    ],
+    "defaultMode": "auto"
   },
-  "model": "claude-fable-5[1m]",
+  "model": "fable",
+  "fallbackModel": [
+    "claude-sonnet-5"
+  ],
   "statusLine": {
     "type": "command",
     "command": "node ~/.claude/hooks/statusline.js"
@@ -38,9 +42,6 @@
     "type": "command",
     "command": "node ~/.claude/hooks/statusline.js subagent"
   },
-  "fallbackModel": [
-    "claude-sonnet-5"
-  ],
   "enabledPlugins": {
     "code-review@claude-plugins-official": false,
     "code-simplifier@claude-plugins-official": false,
@@ -57,17 +58,20 @@
   "effortLevel": "medium",
   "modelSettings": {
     "claude-fable-5": {
-      "effortLevel": "high"
+      "effortLevel": "low"
     }
   },
   "autoCompactWindow": 500000,
+  "askUserQuestionTimeout": "10m",
   "voice": {
     "enabled": true,
     "mode": "hold"
   },
   "skipDangerousModePermissionPrompt": true,
   "skipWorkflowUsageWarning": true,
+  "crossSessionInbound": "accept",
   "inputNeededNotifEnabled": false,
+  "agentPushNotifEnabled": true,
   "skipAutoPermissionPrompt": true,
   "voiceEnabled": true
 }
