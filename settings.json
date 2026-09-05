@@ -81,7 +81,7 @@
         "hooks": [
             {
                 "type": "command",
-                "command": "cmd.exe /d /v:off /s /c '\"\"%USERPROFILE%\\.claude\\hooks\\cbm-code-discovery-gate.cmd\"\"'",
+                "command": "node ~/.claude/hooks/cbm-hook.js",
                 "timeout": 5
             }
         ]
@@ -93,7 +93,7 @@
         "hooks": [
             {
                 "type": "command",
-                "command": "cmd.exe /d /v:off /s /c '\"\"%USERPROFILE%\\.claude\\hooks\\cbm-code-discovery-gate.cmd\"\"'",
+                "command": "node ~/.claude/hooks/cbm-hook.js",
                 "timeout": 5
             }
         ]
@@ -105,7 +105,7 @@
         "hooks": [
             {
                 "type": "command",
-                "command": "cmd.exe /d /v:off /s /c '\"\"%USERPROFILE%\\.claude\\hooks\\cbm-session-reminder.cmd\"\"'",
+                "command": "node ~/.claude/hooks/cbm-hook.js",
                 "timeout": 5
             }
         ]
@@ -115,7 +115,7 @@
         "hooks": [
             {
                 "type": "command",
-                "command": "cmd.exe /d /v:off /s /c '\"\"%USERPROFILE%\\.claude\\hooks\\cbm-session-reminder.cmd\"\"'",
+                "command": "node ~/.claude/hooks/cbm-hook.js",
                 "timeout": 5
             }
         ]
@@ -125,7 +125,7 @@
         "hooks": [
             {
                 "type": "command",
-                "command": "cmd.exe /d /v:off /s /c '\"\"%USERPROFILE%\\.claude\\hooks\\cbm-session-reminder.cmd\"\"'",
+                "command": "node ~/.claude/hooks/cbm-hook.js",
                 "timeout": 5
             }
         ]
@@ -135,7 +135,7 @@
         "hooks": [
             {
                 "type": "command",
-                "command": "cmd.exe /d /v:off /s /c '\"\"%USERPROFILE%\\.claude\\hooks\\cbm-session-reminder.cmd\"\"'",
+                "command": "node ~/.claude/hooks/cbm-hook.js",
                 "timeout": 5
             }
         ]
@@ -147,7 +147,7 @@
         "hooks": [
             {
                 "type": "command",
-                "command": "cmd.exe /d /v:off /s /c '\"\"%USERPROFILE%\\.claude\\hooks\\cbm-subagent-reminder.cmd\"\"'",
+                "command": "node ~/.claude/hooks/cbm-hook.js",
                 "timeout": 5
             }
         ]

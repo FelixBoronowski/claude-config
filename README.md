@@ -57,6 +57,24 @@ Linux/WSL and Windows.
 Note: Claude Code does **not** read `~/.claude/settings.local.json`;
 `settings.local.json` only works at the project level (`.claude/` inside a repo).
 
+## codebase-memory-mcp hooks
+
+The MCP installer registers hooks in `settings.json` that call platform-specific
+scripts (`cmd.exe` + `.cmd` on Windows, `sh` on Linux). This repo replaces them
+with one portable adapter, `hooks/cbm-hook.js`, registered as
+`node ~/.claude/hooks/cbm-hook.js`. It finds the binary per platform (`CBM_BIN`
+override, the default install dir, then PATH) and fails open when it is missing.
+
+After `codebase-memory-mcp update` or re-running its installer, the installer will
+rewrite the hooks block and drop its own `cbm-*.cmd` / `cbm-*.sh` scripts again.
+Restore the portable setup with:
+
+```bash
+cd ~/.claude && git checkout -- settings.json && git clean -f hooks/
+```
+
+then commit anything else the update changed.
+
 ## What's machine-local (never tracked)
 
 Everything not whitelisted in `.gitignore`: `.credentials.json`, `.claude.json`
