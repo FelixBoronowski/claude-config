@@ -73,5 +73,85 @@
   "inputNeededNotifEnabled": false,
   "agentPushNotifEnabled": true,
   "skipAutoPermissionPrompt": true,
-  "voiceEnabled": true
+  "voiceEnabled": true,
+  "hooks": {
+    "PreToolUse": [
+    {
+        "matcher": "Grep|Glob",
+        "hooks": [
+            {
+                "type": "command",
+                "command": "cmd.exe /d /v:off /s /c '\"\"%USERPROFILE%\\.claude\\hooks\\cbm-code-discovery-gate.cmd\"\"'",
+                "timeout": 5
+            }
+        ]
+    }
+],
+    "PostToolUse": [
+    {
+        "matcher": "Read",
+        "hooks": [
+            {
+                "type": "command",
+                "command": "cmd.exe /d /v:off /s /c '\"\"%USERPROFILE%\\.claude\\hooks\\cbm-code-discovery-gate.cmd\"\"'",
+                "timeout": 5
+            }
+        ]
+    }
+],
+    "SessionStart": [
+    {
+        "matcher": "startup",
+        "hooks": [
+            {
+                "type": "command",
+                "command": "cmd.exe /d /v:off /s /c '\"\"%USERPROFILE%\\.claude\\hooks\\cbm-session-reminder.cmd\"\"'",
+                "timeout": 5
+            }
+        ]
+    },
+    {
+        "matcher": "resume",
+        "hooks": [
+            {
+                "type": "command",
+                "command": "cmd.exe /d /v:off /s /c '\"\"%USERPROFILE%\\.claude\\hooks\\cbm-session-reminder.cmd\"\"'",
+                "timeout": 5
+            }
+        ]
+    },
+    {
+        "matcher": "clear",
+        "hooks": [
+            {
+                "type": "command",
+                "command": "cmd.exe /d /v:off /s /c '\"\"%USERPROFILE%\\.claude\\hooks\\cbm-session-reminder.cmd\"\"'",
+                "timeout": 5
+            }
+        ]
+    },
+    {
+        "matcher": "compact",
+        "hooks": [
+            {
+                "type": "command",
+                "command": "cmd.exe /d /v:off /s /c '\"\"%USERPROFILE%\\.claude\\hooks\\cbm-session-reminder.cmd\"\"'",
+                "timeout": 5
+            }
+        ]
+    }
+],
+    "SubagentStart": [
+    {
+        "matcher": "*",
+        "hooks": [
+            {
+                "type": "command",
+                "command": "cmd.exe /d /v:off /s /c '\"\"%USERPROFILE%\\.claude\\hooks\\cbm-subagent-reminder.cmd\"\"'",
+                "timeout": 5
+            }
+        ]
+    }
+]
+  }
 }
