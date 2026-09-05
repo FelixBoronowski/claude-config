@@ -1,0 +1,18 @@
+# Whitelist mode: ignore everything in ~/.claude, then un-ignore the shared config.
+# Anything not listed below (credentials, history, sessions, plugins, cache, ...)
+# stays untracked automatically.
+*
+!.gitignore
+!README.md
+!settings.json
+!CLAUDE.md
+!hooks/
+!hooks/**
+!agents/
+!agents/**
+!commands/
+!commands/**
+# machine-local leftovers that would otherwise match the folders above
+hooks.backup.*
+*.backup.*
+*.pre-restore

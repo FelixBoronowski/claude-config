@@ -1,43 +1,64 @@
 # claude-config
 
 Shared [Claude Code](https://claude.ai/code) configuration, synced across machines
-(WSL2, Windows, future PCs) via symlinks into `~/.claude`.
+(WSL2, Windows, future PCs). `~/.claude` **is** the git checkout: no symlinks, no copy
+step. Every tool (Claude Code itself, MCP installers, plugins) writes plain files,
+and their edits show up in `git status` for review and commit.
+
+A whitelist `.gitignore` ignores everything by default and un-ignores only the shared
+files, so credentials and runtime state can never be committed by accident.
 
 ## Setup on a new machine
 
+`~/.claude` usually already exists (Claude Code creates it on first run), so clone
+into the existing folder:
+
 ```bash
 # WSL2 / Linux / macOS
-git clone <remote-url> ~/dev/claude-config
-~/dev/claude-config/install.sh
+cd ~/.claude
+git init -b main
+git remote add origin https://github.com/FelixBoronowski/claude-config
+git fetch origin
+git checkout -f -t origin/main
 ```
 
 ```powershell
-# Windows (Developer Mode recommended, so symlinks work without admin)
-git clone <remote-url> $env:USERPROFILE\dev\claude-config
-& "$env:USERPROFILE\dev\claude-config\install.ps1"
+# Windows
+Set-Location $env:USERPROFILE\.claude
+git init -b main
+git remote add origin https://github.com/FelixBoronowski/claude-config
+git fetch origin
+git checkout -f -t origin/main
 ```
 
-After changing settings on one machine: commit + push there, `git pull` on the others.
-Symlinked machines pick changes up immediately; if the Windows install fell back to
-copying (no symlink permission), re-run `install.ps1` after pulling.
+`checkout -f` overwrites any default `settings.json` Claude Code generated; back it up
+first if it has anything you want to keep.
+
+## Day-to-day
+
+- Changed a setting, agent, or hook here: `cd ~/.claude && git status`, review, commit, push.
+- On another machine: `cd ~/.claude && git pull`.
+- Claude Code and installers edit `settings.json` in place (plugin toggles, hook
+  registrations). Those show up as diffs; commit them like any other change.
 
 ## What's synced
 
-| File | Purpose |
+| Path | Purpose |
 |---|---|
-| `settings.json` | Main Claude Code settings (model, permissions, plugins, statusline, ...) |
+| `settings.json` | Main Claude Code settings (model, permissions, plugins, statusline, hooks) |
 | `CLAUDE.md` | Global instructions applied to every project |
-| `hooks/` | Custom hook scripts (statusline) |
-| `agents/` | Custom subagents (test-runner, ticket-implementer, ticket-implementer-hard) |
+| `hooks/` | Hook scripts (statusline, installer-provided hooks) |
+| `agents/` | Custom subagents (coder, coder-hard, test-runner, ...) |
+| `commands/` | Custom slash commands |
 
 The statusline command in `settings.json` uses `~` and forward slashes
 (`node ~/.claude/hooks/statusline.js`), which Claude Code expands portably on
-Linux/WSL and Windows — so it can live in the shared file despite being a path.
+Linux/WSL and Windows.
 Note: Claude Code does **not** read `~/.claude/settings.local.json`;
 `settings.local.json` only works at the project level (`.claude/` inside a repo).
 
-## What's machine-local (never in this repo)
+## What's machine-local (never tracked)
 
-Never commit: `~/.claude/.credentials.json`, `~/.claude.json`, `history.jsonl`,
-`projects/`, `sessions/`, `plugins/`, `cache/` — these are auth tokens and per-machine
-runtime state.
+Everything not whitelisted in `.gitignore`: `.credentials.json`, `.claude.json`
+(lives one level up), `history.jsonl`, `projects/`, `sessions/`, `plugins/`, `cache/`,
+`skills/` (installer-managed), and so on.
