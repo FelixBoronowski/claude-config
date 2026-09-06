@@ -3,6 +3,7 @@ name: coder
 description: Implements a well-specced, self-contained coding task end to end (code + tests), fast and cheap. Use whenever a task's spec leaves no open design questions — a settled design, a mechanical refactor, a clearly-scoped fix. For tricky logic, cross-cutting changes, or ambiguity, use coder-hard instead.
 model: sonnet
 effort: medium
+disallowedTools: Agent
 skills:
   - stacks
   - mattpocock-skills:tdd
