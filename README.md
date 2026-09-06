@@ -34,6 +34,19 @@ git checkout -f -t origin/main
 `checkout -f` overwrites any default `settings.json` Claude Code generated; back it up
 first if it has anything you want to keep.
 
+Then register the user-scoped MCP servers (they live in `~/.claude.json`, which is
+never tracked):
+
+```bash
+bash ~/.claude/setup.sh
+```
+
+## Model
+
+`settings.json` deliberately sets no `model`: each machine starts on whatever you
+pick with `/model` or `claude --model`. If `/model` writes a `model` key back into
+`settings.json`, that shows up as a diff — don't commit it.
+
 ## Day-to-day
 
 - Changed a setting, agent, or hook here: `cd ~/.claude && git status`, review, commit, push.
@@ -48,7 +61,8 @@ first if it has anything you want to keep.
 | `settings.json` | Main Claude Code settings (model, permissions, plugins, statusline, hooks) |
 | `CLAUDE.md` | Global instructions applied to every project |
 | `hooks/` | Hook scripts (statusline, installer-provided hooks) |
-| `agents/` | Custom subagents (coder, coder-hard, test-runner, ...) |
+| `agents/` | Custom subagents (coder, coder-hard, reviewer, test-runner, ...) |
+| `setup.sh` | Per-machine bootstrap for user-scoped MCP registrations |
 | `commands/` | Custom slash commands |
 | `skills/` | Custom skills (`stacks`, `codebase-memory`) |
 

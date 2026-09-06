@@ -30,7 +30,6 @@
     ],
     "defaultMode": "auto"
   },
-  "model": "fable",
   "fallbackModel": [
     "claude-sonnet-5"
   ],
@@ -127,11 +126,6 @@
   },
   "extraKnownMarketplaces": {},
   "effortLevel": "medium",
-  "modelSettings": {
-    "claude-fable-5": {
-      "effortLevel": "low"
-    }
-  },
   "autoCompactWindow": 500000,
   "askUserQuestionTimeout": "10m",
   "voice": {

@@ -5,6 +5,7 @@
 !.gitignore
 !README.md
 !settings.json
+!setup.sh
 !CLAUDE.md
 !hooks/
 !hooks/**
