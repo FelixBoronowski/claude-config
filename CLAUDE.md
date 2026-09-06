@@ -9,7 +9,7 @@ The main session runs on Fable and is the orchestrator. Route work by these gate
 **Thinking stays in the main session.** Planning and discussion skills — /grilling, /grill-me, /grill-with-docs, /to-spec, /to-tickets, /wayfinder, /triage, /domain-modeling, /codebase-design, /diagnosing-bugs — always run inline. Never delegate the interviewing, speccing, or decision-making to a subagent.
 
 **ALL coding gets delegated.** The main session never edits code inline — not even one-liners or review-finding fixes (docs, ADRs, config, and memory stay inline). When a task is agent-ready (spec complete, seams agreed, no open design questions), delegate it via the Agent tool:
-- `coder` (Sonnet) for straightforward tasks. A project-local `coder` (`.claude/agents/coder.md`) shadows the global one where it exists — prefer that, it carries the repo's traps.
+- `coder` (Sonnet) for straightforward tasks. Agents read the project CLAUDE.md first, so repo traps belong there, not in per-project agent copies.
 - `coder-hard` (Opus, high effort) for tasks with tricky logic, cross-cutting changes, or performance-sensitive code.
 
 Batch small related fixes into one delegation rather than dripping one-liners. Pass the full task text plus any context the agent can't discover itself (relevant ADRs, CONTEXT.md vocabulary, file pointers). When the agent reports back, review the diff, run /code-review, and commit from the main session. If a task still has open questions, resolve them in the main session first.

@@ -12,6 +12,8 @@
 !agents/**
 !commands/
 !commands/**
+!skills/
+!skills/**
 # machine-local leftovers that would otherwise match the folders above
 hooks.backup.*
 *.backup.*
