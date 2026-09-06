@@ -50,6 +50,7 @@ first if it has anything you want to keep.
 | `hooks/` | Hook scripts (statusline, installer-provided hooks) |
 | `agents/` | Custom subagents (coder, coder-hard, test-runner, ...) |
 | `commands/` | Custom slash commands |
+| `skills/` | Custom skills (`stacks`, `codebase-memory`) |
 
 The statusline command in `settings.json` uses `~` and forward slashes
 (`node ~/.claude/hooks/statusline.js`), which Claude Code expands portably on
@@ -78,5 +79,4 @@ then commit anything else the update changed.
 ## What's machine-local (never tracked)
 
 Everything not whitelisted in `.gitignore`: `.credentials.json`, `.claude.json`
-(lives one level up), `history.jsonl`, `projects/`, `sessions/`, `plugins/`, `cache/`,
-`skills/` (installer-managed), and so on.
+(lives one level up), `history.jsonl`, `projects/`, `sessions/`, `plugins/`, `cache/`, and so on.

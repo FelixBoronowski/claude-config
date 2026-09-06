@@ -34,6 +34,86 @@
   "fallbackModel": [
     "claude-sonnet-5"
   ],
+  "hooks": {
+    "PreToolUse": [
+      {
+        "matcher": "Grep|Glob",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "node ~/.claude/hooks/cbm-hook.js",
+            "timeout": 5
+          }
+        ]
+      }
+    ],
+    "PostToolUse": [
+      {
+        "matcher": "Read",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "node ~/.claude/hooks/cbm-hook.js",
+            "timeout": 5
+          }
+        ]
+      }
+    ],
+    "SessionStart": [
+      {
+        "matcher": "startup",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "node ~/.claude/hooks/cbm-hook.js",
+            "timeout": 5
+          }
+        ]
+      },
+      {
+        "matcher": "resume",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "node ~/.claude/hooks/cbm-hook.js",
+            "timeout": 5
+          }
+        ]
+      },
+      {
+        "matcher": "clear",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "node ~/.claude/hooks/cbm-hook.js",
+            "timeout": 5
+          }
+        ]
+      },
+      {
+        "matcher": "compact",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "node ~/.claude/hooks/cbm-hook.js",
+            "timeout": 5
+          }
+        ]
+      }
+    ],
+    "SubagentStart": [
+      {
+        "matcher": "*",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "node ~/.claude/hooks/cbm-hook.js",
+            "timeout": 5
+          }
+        ]
+      }
+    ]
+  },
   "statusLine": {
     "type": "command",
     "command": "node ~/.claude/hooks/statusline.js"
@@ -43,15 +123,6 @@
     "command": "node ~/.claude/hooks/statusline.js subagent"
   },
   "enabledPlugins": {
-    "code-review@claude-plugins-official": false,
-    "code-simplifier@claude-plugins-official": false,
-    "feature-dev@claude-plugins-official": false,
-    "security-guidance@claude-plugins-official": false,
-    "plugin-dev@claude-plugins-official": false,
-    "csharp-lsp@claude-plugins-official": false,
-    "ruby-lsp@claude-plugins-official": false,
-    "frontend-design@claude-plugins-official": false,
-    "claude-code-setup@claude-plugins-official": false,
     "mattpocock-skills@claude-plugins-official": true
   },
   "extraKnownMarketplaces": {},
@@ -72,86 +143,5 @@
   "crossSessionInbound": "accept",
   "inputNeededNotifEnabled": false,
   "agentPushNotifEnabled": true,
-  "skipAutoPermissionPrompt": true,
-  "voiceEnabled": true,
-  "hooks": {
-    "PreToolUse": [
-    {
-        "matcher": "Grep|Glob",
-        "hooks": [
-            {
-                "type": "command",
-                "command": "node ~/.claude/hooks/cbm-hook.js",
-                "timeout": 5
-            }
-        ]
-    }
-],
-    "PostToolUse": [
-    {
-        "matcher": "Read",
-        "hooks": [
-            {
-                "type": "command",
-                "command": "node ~/.claude/hooks/cbm-hook.js",
-                "timeout": 5
-            }
-        ]
-    }
-],
-    "SessionStart": [
-    {
-        "matcher": "startup",
-        "hooks": [
-            {
-                "type": "command",
-                "command": "node ~/.claude/hooks/cbm-hook.js",
-                "timeout": 5
-            }
-        ]
-    },
-    {
-        "matcher": "resume",
-        "hooks": [
-            {
-                "type": "command",
-                "command": "node ~/.claude/hooks/cbm-hook.js",
-                "timeout": 5
-            }
-        ]
-    },
-    {
-        "matcher": "clear",
-        "hooks": [
-            {
-                "type": "command",
-                "command": "node ~/.claude/hooks/cbm-hook.js",
-                "timeout": 5
-            }
-        ]
-    },
-    {
-        "matcher": "compact",
-        "hooks": [
-            {
-                "type": "command",
-                "command": "node ~/.claude/hooks/cbm-hook.js",
-                "timeout": 5
-            }
-        ]
-    }
-],
-    "SubagentStart": [
-    {
-        "matcher": "*",
-        "hooks": [
-            {
-                "type": "command",
-                "command": "node ~/.claude/hooks/cbm-hook.js",
-                "timeout": 5
-            }
-        ]
-    }
-]
-  }
+  "skipAutoPermissionPrompt": true
 }
