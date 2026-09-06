@@ -12,7 +12,7 @@ The main session runs on Fable and is the orchestrator. Route work by these gate
 - `coder` (Sonnet) for straightforward tasks. Agents read the project CLAUDE.md first, so repo traps belong there, not in per-project agent copies.
 - `coder-hard` (Opus, high effort) for tasks with tricky logic, cross-cutting changes, or performance-sensitive code.
 
-Batch small related fixes into one delegation rather than dripping one-liners. Pass the full task text plus any context the agent can't discover itself (relevant ADRs, CONTEXT.md vocabulary, file pointers). When the agent reports back, send the spec and diff scope to the `reviewer` agent (Opus, read-only) instead of reading the diff inline; act on its findings, then commit from the main session. If a task still has open questions, resolve them in the main session first.
+Batch small related fixes into one delegation rather than dripping one-liners. Pass the full task text plus any context the agent can't discover itself (relevant ADRs, CONTEXT.md vocabulary, file pointers). When the agent reports back, branch on its status token: `DONE` / `DONE_WITH_CONCERNS` → send the spec and diff scope to the `reviewer` agent (Opus, read-only) instead of reading the diff inline, act on its findings, then commit from the main session; `BLOCKED` / `NEEDS_CONTEXT` → resolve in the main session and re-delegate. Run /code-review once per branch before merging, not per task. If a task still has open questions, resolve them in the main session first.
 
 **Escalation:** if a coder agent stops and reports an ambiguity or missing decision, resolve it in the main session, then re-delegate (escalating to `coder-hard` if the problem was difficulty rather than spec).
 
