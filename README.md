@@ -66,9 +66,11 @@ pick with `/model` or `claude --model`. If `/model` writes a `model` key back in
 | `commands/` | Custom slash commands |
 | `skills/` | Custom skills (`stacks`, `codebase-memory`) |
 
-The statusline command in `settings.json` uses `~` and forward slashes
-(`node ~/.claude/hooks/statusline.js`), which Claude Code expands portably on
-Linux/WSL and Windows.
+The hook and statusline commands in `settings.json` resolve the home directory as
+`${USERPROFILE:-$HOME}` with forward slashes, so they work on Linux/WSL and Windows.
+Do not use `~`: Claude Code runs commands in Git Bash on Windows, where `~` follows
+`HOMEDRIVE` (a network drive on domain machines) while Claude Code itself keeps
+`.claude` under `USERPROFILE`.
 Note: Claude Code does **not** read `~/.claude/settings.local.json`;
 `settings.local.json` only works at the project level (`.claude/` inside a repo).
 
