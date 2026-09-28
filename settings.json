@@ -73,6 +73,11 @@
             "type": "command",
             "command": "node \"${USERPROFILE:-$HOME}/.claude/hooks/cbm-hook.js\"",
             "timeout": 5
+          },
+          {
+            "type": "command",
+            "command": "node \"${USERPROFILE:-$HOME}/.claude/hooks/config-sync-check.js\"",
+            "timeout": 10
           }
         ]
       },

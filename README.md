@@ -41,6 +41,24 @@ never tracked):
 bash ~/.claude/setup.sh
 ```
 
+## What else to install
+
+The repo only carries config. Each machine also needs:
+
+| What | Why | Install |
+|---|---|---|
+| Git | `~/.claude` is a checkout; the sync check runs `git` | Git for Windows (brings Git Bash, which Claude Code uses for hook commands) |
+| Node.js | Runs `hooks/cbm-hook.js`, `hooks/config-sync-check.js` and `hooks/statusline.js` | Any current LTS; must be on `PATH` |
+| [codebase-memory-mcp](https://github.com/DeusData/codebase-memory-mcp) | MCP server behind the `codebase-memory*` agents, the `codebase-memory` skill and `cbm-hook.js` | Its installer, then `setup.sh`. The installer rewrites tracked files — see [codebase-memory-mcp hooks](#codebase-memory-mcp-hooks) |
+| `mattpocock-skills` plugin | `/tdd`, `/grilling`, `/code-review` and the other skills `CLAUDE.md` routes to | `/plugin`, from the `claude-plugins-official` marketplace; `settings.json` already enables it |
+
+Known versions: codebase-memory-mcp 0.10.8 installs to
+`%LOCALAPPDATA%\Programs\codebase-memory-mcp`; 0.11.0 moves it to `~/.local/bin`.
+`cbm-hook.js` checks the old location first, so remove the old binary after upgrading.
+
+**After running any installer or updater, review `git diff` in `~/.claude` before
+committing.** Installers write straight into tracked files.
+
 ## Model
 
 `settings.json` deliberately sets no `model`: each machine starts on whatever you
@@ -54,13 +72,25 @@ pick with `/model` or `claude --model`. If `/model` writes a `model` key back in
 - Claude Code and installers edit `settings.json` in place (plugin toggles, hook
   registrations). Those show up as diffs; commit them like any other change.
 
+### Sync check
+
+`hooks/config-sync-check.js` runs on every new session (SessionStart `startup`). It
+fetches `origin` and warns, visibly and in Claude's context, when `~/.claude`:
+
+- is not a git checkout of this repo (the machine was never set up),
+- has uncommitted or untracked changes,
+- is behind `origin/main` or has unpushed commits.
+
+It prints nothing when everything is in sync, skips the remote check when offline,
+and never changes the repo apart from the fetch.
+
 ## What's synced
 
 | Path | Purpose |
 |---|---|
 | `settings.json` | Main Claude Code settings (model, permissions, plugins, statusline, hooks) |
 | `CLAUDE.md` | Global instructions applied to every project |
-| `hooks/` | Hook scripts (statusline, installer-provided hooks) |
+| `hooks/` | Hook scripts (statusline, sync check, codebase-memory adapter) |
 | `agents/` | Custom subagents (coder, coder-hard, reviewer, test-runner, ...) |
 | `setup.sh` | Per-machine bootstrap for user-scoped MCP registrations |
 | `commands/` | Custom slash commands |
