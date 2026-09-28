@@ -47,8 +47,8 @@ The repo only carries config. Each machine also needs:
 
 | What | Why | Install |
 |---|---|---|
-| Git | `~/.claude` is a checkout; the sync check runs `git` | Git for Windows (brings Git Bash, which Claude Code uses for hook commands) |
-| Node.js | Runs `hooks/cbm-hook.js`, `hooks/config-sync-check.js` and `hooks/statusline.js` | Any current LTS; must be on `PATH` |
+| Git | `~/.claude` is a git checkout of this repo | Git for Windows (brings Git Bash, which Claude Code uses for hook commands) |
+| Node.js | Runs `hooks/cbm-hook.js` and `hooks/statusline.js` | Any current LTS; must be on `PATH` |
 | [codebase-memory-mcp](https://github.com/DeusData/codebase-memory-mcp) | MCP server behind the `codebase-memory*` agents, the `codebase-memory` skill and `cbm-hook.js` | Its installer, then `setup.sh`. The installer rewrites tracked files — see [codebase-memory-mcp hooks](#codebase-memory-mcp-hooks) |
 | `mattpocock-skills` plugin | `/tdd`, `/grilling`, `/code-review` and the other skills `CLAUDE.md` routes to | `/plugin`, from the `claude-plugins-official` marketplace; `settings.json` already enables it |
 
@@ -68,20 +68,9 @@ pick with `/model` or `claude --model`. If `/model` writes a `model` key back in
 
 - Changed a setting, agent, or hook here: `cd ~/.claude && git status`, review, commit, push.
 - On another machine: `cd ~/.claude && git pull`.
+- Update codebase-memory-mcp every few weeks (check its [releases](https://github.com/DeusData/codebase-memory-mcp/releases)): quit Claude Code, run the installer, then restore and review as described in [codebase-memory-mcp hooks](#codebase-memory-mcp-hooks) and bump "Known versions" above.
 - Claude Code and installers edit `settings.json` in place (plugin toggles, hook
   registrations). Those show up as diffs; commit them like any other change.
-
-### Sync check
-
-`hooks/config-sync-check.js` runs on every new session (SessionStart `startup`). It
-fetches `origin` and warns, visibly and in Claude's context, when `~/.claude`:
-
-- is not a git checkout of this repo (the machine was never set up),
-- has uncommitted or untracked changes,
-- is behind `origin/main` or has unpushed commits.
-
-It prints nothing when everything is in sync, skips the remote check when offline,
-and never changes the repo apart from the fetch.
 
 ## What's synced
 
@@ -89,7 +78,7 @@ and never changes the repo apart from the fetch.
 |---|---|
 | `settings.json` | Main Claude Code settings (model, permissions, plugins, statusline, hooks) |
 | `CLAUDE.md` | Global instructions applied to every project |
-| `hooks/` | Hook scripts (statusline, sync check, codebase-memory adapter) |
+| `hooks/` | Hook scripts (statusline, codebase-memory adapter) |
 | `agents/` | Custom subagents (coder, coder-hard, reviewer, test-runner, ...) |
 | `setup.sh` | Per-machine bootstrap for user-scoped MCP registrations |
 | `commands/` | Custom slash commands |
