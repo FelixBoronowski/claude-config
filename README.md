@@ -111,11 +111,11 @@ with one portable adapter, `hooks/cbm-hook.js`, registered as
 `node ~/.claude/hooks/cbm-hook.js`. It finds the binary per platform (`CBM_BIN`
 override, the default install dir, then PATH) and fails open when it is missing.
 
-Only the SessionStart and SubagentStart hooks are registered. The installer also
-adds PreToolUse (Grep/Glob/Bash) and PostToolUse (Read) hooks; we drop them because
-`hook-augment` printed nothing for any event on 0.10.8 or 0.11.0 while costing
-~2.3 s per tool call (upstream #1335, #2058). Re-add them once a release makes
-`hook-augment` emit context.
+We register the same hook events the installer does (PreToolUse Grep/Glob/Bash,
+PostToolUse Read, SessionStart, SubagentStart), all through `cbm-hook.js`. When an
+update changes that set, mirror it here. As of 0.11.0 `hook-augment` prints nothing
+for any event and takes ~2.3 s per call (upstream #1335, #2058); we keep the hooks
+anyway so they start working as soon as a release fixes that.
 
 On Windows, `codebase-memory-mcp update` only points you at
 `install.ps1`; quit every Claude Code session first, since the running MCP server
