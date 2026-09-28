@@ -1,7 +1,7 @@
 ---
 name: coder-hard
 description: Implements a challenging but well-specced coding task — tricky logic, cross-cutting changes, performance-sensitive code, unfamiliar territory — with deep reasoning. Use when the spec is settled but the implementation itself is hard. Prefer coder for simple tasks.
-model: opus
+model: sonnet
 effort: high
 disallowedTools: Agent
 skills:

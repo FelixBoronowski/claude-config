@@ -38,7 +38,7 @@
     "defaultMode": "auto"
   },
   "fallbackModel": [
-    "claude-sonnet-5"
+    "claude-sonnet-5-5"
   ],
   "hooks": {
     "PreToolUse": [
@@ -133,6 +133,20 @@
   },
   "extraKnownMarketplaces": {},
   "effortLevel": "medium",
+  "modelSettings": {
+    "claude-fable-5": {
+      "effortLevel": "high"
+    },
+    "claude-fable-5-1": {
+      "effortLevel": "high"
+    },
+    "claude-opus-5": {
+      "effortLevel": "medium"
+    },
+    "claude-opus-5-5": {
+      "effortLevel": "medium"
+    }
+  },
   "autoCompactWindow": 500000,
   "askUserQuestionTimeout": "10m",
   "voice": {
