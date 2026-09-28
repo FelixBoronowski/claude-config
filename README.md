@@ -52,9 +52,8 @@ The repo only carries config. Each machine also needs:
 | [codebase-memory-mcp](https://github.com/DeusData/codebase-memory-mcp) | MCP server behind the `codebase-memory*` agents, the `codebase-memory` skill and `cbm-hook.js` | Its installer, then `setup.sh`. The installer rewrites tracked files — see [codebase-memory-mcp hooks](#codebase-memory-mcp-hooks) |
 | `mattpocock-skills` plugin | `/tdd`, `/grilling`, `/code-review` and the other skills `CLAUDE.md` routes to | `/plugin`, from the `claude-plugins-official` marketplace; `settings.json` already enables it |
 
-Known versions: codebase-memory-mcp 0.10.8 installs to
-`%LOCALAPPDATA%\Programs\codebase-memory-mcp`; 0.11.0 moves it to `~/.local/bin`.
-`cbm-hook.js` checks the old location first, so remove the old binary after upgrading.
+Known versions: 0.11.0 (updated 2026-09-28). On Windows the binary lives in
+`%LOCALAPPDATA%\Programs\codebase-memory-mcp` and updates replace it in place.
 
 **After running any installer or updater, review `git diff` in `~/.claude` before
 committing.** Installers write straight into tracked files.
@@ -112,12 +111,27 @@ with one portable adapter, `hooks/cbm-hook.js`, registered as
 `node ~/.claude/hooks/cbm-hook.js`. It finds the binary per platform (`CBM_BIN`
 override, the default install dir, then PATH) and fails open when it is missing.
 
-After `codebase-memory-mcp update` or re-running its installer, the installer will
-rewrite the hooks block and drop its own `cbm-*.cmd` / `cbm-*.sh` scripts again.
+Only the SessionStart and SubagentStart hooks are registered. The installer also
+adds PreToolUse (Grep/Glob/Bash) and PostToolUse (Read) hooks; we drop them because
+`hook-augment` printed nothing for any event on 0.10.8 or 0.11.0 while costing
+~2.3 s per tool call (upstream #1335, #2058). Re-add them once a release makes
+`hook-augment` emit context.
+
+On Windows, `codebase-memory-mcp update` only points you at
+`install.ps1`; quit every Claude Code session first, since the running MCP server
+locks the binary. The installer:
+
+- replaces the binary in place, even when it reports `installation failed`;
+- fails on our three `codebase-memory*` agents (`preserved modified profile`) —
+  expected, our copies are intentional;
+- appends its own hook entries next to ours, using an `args` key Claude Code
+  does not support (upstream #2239), and drops its `cbm-*.cmd` / `cbm-*.sh`
+  scripts again.
+
 Restore the portable setup with:
 
 ```bash
-cd ~/.claude && git checkout -- settings.json && git clean -f hooks/
+cd ~/.claude && git checkout -- settings.json skills/ && git clean -f hooks/
 ```
 
 then commit anything else the update changed.
