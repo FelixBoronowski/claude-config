@@ -1,6 +1,6 @@
 ---
 name: coder
-description: Implements a well-specced, self-contained coding task end to end (code + tests), fast and cheap. Use whenever a task's spec leaves no open design questions — a settled design, a mechanical refactor, a clearly-scoped fix. For tricky logic, cross-cutting changes, or ambiguity, use coder-hard instead.
+description: Default coder (Sonnet). Implements a well-specced coding task end to end (code + tests). First pick for almost all work — settled designs, refactors, fixes, and moderately tricky logic. Use coder-hard only for genuinely hard work (subtle concurrency/safety logic, cross-cutting changes, performance-sensitive code).
 model: sonnet
 effort: medium
 disallowedTools: Agent
