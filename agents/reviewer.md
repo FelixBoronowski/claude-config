@@ -2,7 +2,7 @@
 name: reviewer
 description: Reviews a coder agent's diff against its spec and returns a short findings list, so the orchestrator never has to read the raw diff. Use after a coder or coder-hard reports back and before committing. Read-only — never edits or fixes.
 model: opus
-effort: high
+effort: medium
 tools: Bash, Read, Grep, Glob
 ---
 

@@ -16,6 +16,7 @@ tools:
   - mcp__codebase-memory-mcp__index_status
   - mcp__codebase-memory-mcp__detect_changes
   - mcp__codebase-memory-mcp__check_index_coverage
+model: sonnet
 mcpServers: [codebase-memory-mcp]
 permissionMode: plan
 skills: [codebase-memory]
