@@ -129,9 +129,17 @@
     "command": "node \"${USERPROFILE:-$HOME}/.claude/hooks/statusline.js\" subagent"
   },
   "enabledPlugins": {
-    "mattpocock-skills@claude-plugins-official": true
+    "mattpocock-skills@claude-plugins-official": true,
+    "ponytail@ponytail": true
   },
-  "extraKnownMarketplaces": {},
+  "extraKnownMarketplaces": {
+    "ponytail": {
+      "source": {
+        "source": "github",
+        "repo": "DietrichGebert/ponytail"
+      }
+    }
+  },
   "effortLevel": "medium",
   "modelSettings": {
     "claude-fable-5": {
