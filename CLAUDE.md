@@ -18,3 +18,11 @@ Batch small related fixes into one delegation rather than dripping one-liners. P
 **Escalation:** if a coder agent stops and reports an ambiguity or missing decision, resolve it in the main session, then re-delegate (escalating one rung, `coder` → `coder-hard` → `coder-max`, if the problem was difficulty rather than spec).
 
 **Check-running gets delegated.** When the only job is to run a test suite, single test file, typecheck, lint, or build and learn pass/fail (e.g. verification steps in /implement or /tdd), use the `test-runner` agent (Haiku) rather than running it inline — it keeps long logs out of the main context. Exception: during a tight red-green loop where you need to iterate on the failure output immediately, running inline is fine.
+
+## Worktrees
+
+- **Worktrees live beside the repo, never inside it:** `<repo>-worktrees/<name>` (e.g. `D:\dev\csgroup\invio-worktrees\feature-x`). Gitignored in-repo paths break formatters, duplicate code for indexers and test discovery, and inherit the parent's build config. The global `WorktreeCreate`/`WorktreeRemove` hooks (`~/.claude/hooks/worktree-*.js`) enforce this.
+- **Create worktrees with `EnterWorktree` or `isolation: "worktree"`, never `git worktree add` via Bash** — Bash bypasses the hook, so you get no submodules, no copied files, wrong location.
+- The hook branches off the current `HEAD`, checks out submodules with `--reference` to the main checkout (objects shared, no re-download), copies gitignored files listed in the repo's `.worktreeinclude`, then runs `<repo>/.claude/worktree-setup.ps1` if present (env `MAIN_CHECKOUT`). Repo-specific setup goes in that script — never add a second `WorktreeCreate` hook in a project's settings.
+- **The hook names the branch after the worktree** (e.g. `agent-a1b2…`). Rename it to the repo's convention (`git branch -m feature/<topic>`) before pushing.
+- **Agents' worktrees are the orchestrator's to clean up:** `WorktreeRemove` does not fire when a subagent finishes. Once the branch is merged, remove it: `echo '{"worktree_path":"<path>"}' | node ~/.claude/hooks/worktree-remove.js` (deletes the folder, prunes, `git branch -d`s a merged branch).
