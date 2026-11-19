@@ -132,5 +132,10 @@
     "sessionUrl": false
   },
   "useAutoModeDuringPlan": true,
-  "workflowKeywordTriggerEnabled": false
+  "workflowKeywordTriggerEnabled": false,
+  "modelSettings": {
+    "claude-opus-5-5": {
+      "effortLevel": "medium"
+    }
+  }
 }
