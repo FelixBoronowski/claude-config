@@ -2,11 +2,11 @@
   "hooks": {
     "PreToolUse": [
       {
-        "matcher": "Grep|Glob",
+        "matcher": "Grep|Glob|Bash",
         "hooks": [
           {
             "type": "command",
-            "command": "node ~/.claude/hooks/cbm-hook.js",
+            "command": "node \"${USERPROFILE:-$HOME}/.claude/hooks/cbm-hook.js\"",
             "timeout": 5
           }
         ]
@@ -18,7 +18,7 @@
         "hooks": [
           {
             "type": "command",
-            "command": "node ~/.claude/hooks/cbm-hook.js",
+            "command": "node \"${USERPROFILE:-$HOME}/.claude/hooks/cbm-hook.js\"",
             "timeout": 5
           }
         ]
@@ -30,7 +30,7 @@
         "hooks": [
           {
             "type": "command",
-            "command": "node ~/.claude/hooks/cbm-hook.js",
+            "command": "node \"${USERPROFILE:-$HOME}/.claude/hooks/cbm-hook.js\"",
             "timeout": 5
           }
         ]
@@ -40,7 +40,7 @@
         "hooks": [
           {
             "type": "command",
-            "command": "node ~/.claude/hooks/cbm-hook.js",
+            "command": "node \"${USERPROFILE:-$HOME}/.claude/hooks/cbm-hook.js\"",
             "timeout": 5
           }
         ]
@@ -50,7 +50,7 @@
         "hooks": [
           {
             "type": "command",
-            "command": "node ~/.claude/hooks/cbm-hook.js",
+            "command": "node \"${USERPROFILE:-$HOME}/.claude/hooks/cbm-hook.js\"",
             "timeout": 5
           }
         ]
@@ -60,7 +60,7 @@
         "hooks": [
           {
             "type": "command",
-            "command": "node ~/.claude/hooks/cbm-hook.js",
+            "command": "node \"${USERPROFILE:-$HOME}/.claude/hooks/cbm-hook.js\"",
             "timeout": 5
           }
         ]
@@ -72,7 +72,7 @@
         "hooks": [
           {
             "type": "command",
-            "command": "node ~/.claude/hooks/cbm-hook.js",
+            "command": "node \"${USERPROFILE:-$HOME}/.claude/hooks/cbm-hook.js\"",
             "timeout": 5
           }
         ]
@@ -83,7 +83,7 @@
         "hooks": [
           {
             "type": "command",
-            "command": "node ~/.claude/hooks/worktree-create.js",
+            "command": "node \"${USERPROFILE:-$HOME}/.claude/hooks/worktree-create.js\"",
             "timeout": 600
           }
         ]
@@ -94,7 +94,7 @@
         "hooks": [
           {
             "type": "command",
-            "command": "node ~/.claude/hooks/worktree-remove.js",
+            "command": "node \"${USERPROFILE:-$HOME}/.claude/hooks/worktree-remove.js\"",
             "timeout": 120
           }
         ]
@@ -103,7 +103,7 @@
   },
   "statusLine": {
     "type": "command",
-    "command": "node \"C:/Users/Felix/.claude/hooks/statusline.js\""
+    "command": "node \"${USERPROFILE:-$HOME}/.claude/hooks/statusline.js\""
   },
   "enabledPlugins": {
     "mattpocock-skills@claude-plugins-official": true,
@@ -130,5 +130,7 @@
     "commit": "",
     "pr": "",
     "sessionUrl": false
-  }
+  },
+  "useAutoModeDuringPlan": true,
+  "workflowKeywordTriggerEnabled": false
 }

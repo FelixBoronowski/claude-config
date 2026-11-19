@@ -1,8 +1,8 @@
 ---
 name: coder-hard
-description: Implements a genuinely hard but well-specced coding task (Opus, medium effort) — subtle safety or concurrency logic, cross-cutting changes, performance-sensitive code. Prefer coder (Sonnet) unless the task clearly needs more; escalate to coder-max only if this agent fails.
-model: opus
-effort: medium
+description: Implements a genuinely hard but well-specced coding task (Sonnet, high effort) — subtle safety or concurrency logic, cross-cutting changes, performance-sensitive code. Prefer coder (Sonnet) unless the task clearly needs more; if it fails for difficulty reasons, the orchestrator re-runs it with model: "opus".
+model: sonnet
+effort: high
 disallowedTools: Agent
 skills:
   - stacks
