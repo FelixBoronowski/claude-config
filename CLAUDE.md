@@ -17,7 +17,7 @@ Batch small related fixes into one delegation rather than dripping one-liners. P
 
 **Escalation:** if a coder agent stops and reports an ambiguity or missing decision, resolve it in the main session, then re-delegate (escalating one rung, `coder` → `coder-hard` → `coder-max`, if the problem was difficulty rather than spec).
 
-**Check-running gets delegated.** When the only job is to run a test suite, single test file, typecheck, lint, or build and learn pass/fail (e.g. verification steps in /implement or /tdd), use the `test-runner` agent (Haiku) rather than running it inline — it keeps long logs out of the main context. Exception: during a tight red-green loop where you need to iterate on the failure output immediately, running inline is fine.
+**Check-running gets delegated.** When the only job is to run a test suite, single test file, typecheck, lint, or build and learn pass/fail (e.g. verification steps in /tdd), use the `test-runner` agent (Haiku) rather than running it inline — it keeps long logs out of the main context. Exception: during a tight red-green loop where you need to iterate on the failure output immediately, running inline is fine.
 
 ## Worktrees
 

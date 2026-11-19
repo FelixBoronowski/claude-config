@@ -1,45 +1,4 @@
 {
-  "attribution": {
-    "commit": "",
-    "pr": "",
-    "sessionUrl": false
-  },
-  "permissions": {
-    "allow": [
-      "Bash(dotnet build:*)",
-      "Bash(dotnet test:*)",
-      "Bash(dotnet restore:*)",
-      "Bash(pytest:*)",
-      "Bash(uv run pytest:*)",
-      "Bash(mypy:*)",
-      "Bash(ruff check:*)",
-      "Bash(bundle exec rspec:*)",
-      "Bash(bundle exec rubocop:*)",
-      "Bash(rake test:*)",
-      "Bash(npm test:*)",
-      "Bash(npm run test:*)",
-      "Bash(npm run build:*)",
-      "Bash(npm run lint:*)",
-      "Bash(npm run typecheck:*)",
-      "Bash(npx tsc:*)",
-      "Bash(npx vitest run:*)",
-      "Bash(git status:*)",
-      "Bash(git diff:*)",
-      "Bash(git log:*)",
-      "Bash(dotnet csharpier:*)",
-      "Bash(dotnet format:*)",
-      "Bash(uv sync:*)",
-      "Bash(uv run ruff:*)",
-      "Bash(ruff format:*)",
-      "Bash(uv run mypy:*)",
-      "Bash(uv run pyright:*)"
-    ],
-    "defaultMode": "auto"
-  },
-  "model": "opus[1m]",
-  "fallbackModel": [
-    "claude-sonnet-5"
-  ],
   "hooks": {
     "PreToolUse": [
       {
@@ -146,10 +105,6 @@
     "type": "command",
     "command": "node \"C:/Users/Felix/.claude/hooks/statusline.js\""
   },
-  "subagentStatusLine": {
-    "type": "command",
-    "command": "node \"C:/Users/Felix/.claude/hooks/statusline.js\" subagent"
-  },
   "enabledPlugins": {
     "mattpocock-skills@claude-plugins-official": true,
     "ponytail@ponytail": true
@@ -162,57 +117,18 @@
       }
     }
   },
-  "effortLevel": "medium",
-  "autoCompactWindow": 500000,
-  "askUserQuestionTimeout": "10m",
-  "voice": {
-    "enabled": true,
-    "mode": "hold"
-  },
-  "autoMemoryEnabled": false,
-  "skipDangerousModePermissionPrompt": true,
-  "skipWorkflowUsageWarning": true,
-  "crossSessionInbound": "accept",
-  "inputNeededNotifEnabled": false,
-  "agentPushNotifEnabled": true,
-  "skipAutoPermissionPrompt": true,
-  "autoMode": {
-    "soft_deny": [
-      "$defaults",
-      "Bash(git push origin main:*) in D:\\dev\\csgroup\\invio — production release branch, squash-merge-only per repo release process",
-      "Bash(git reset develop --hard main:*) in D:\\dev\\csgroup\\invio — repo CLAUDE.md explicitly warns this loses develop's history"
-    ],
-    "environment": [
-      "### Org-wide",
-      "**Organization**: None configured",
-      "**Cloud provider(s)**: None configured",
-      "**Repository visibility**: Not queryable via gh (origin remote is a GHE-style host, gitlab.cs-group.de, not a plain owner/repo GitHub URL) — assume private (internal corporate GitLab host, repo path `consulting/invio`)",
-      "**Internal sharing / snippet hosting**: None configured — treat public paste/gist services as outside the trust boundary",
-      "**Secrets management**: None configured",
-      "**Default / protected branches**: `develop` is the default branch (integration, full history); `main` holds production releases (squashed commits only) per repo CLAUDE.md — branch protection not queryable via gh; treat both `main` and `develop` as protected given the documented release process",
-      "**CI/CD deploy targets**: None configured",
-      "**Network posture**: None configured",
-      "**Host containment**: None configured — assume Claude Code runs on an ordinary developer machine with open internet",
-      "**Source control**: The trusted repo (gitlab.cs-group.de:consulting/invio.git) and its remote(s) only — no additional orgs configured",
-      "**Trusted internal domains**: None configured",
-      "**Trusted cloud buckets**: None configured",
-      "**Key internal services**: None configured",
-      "**Internal package registry**: None configured",
-      "**Sensitive data locations & audiences**: any file or store holding personal data, confidential business data, credentials, regulated data, or similarly sensitive material; preserve exact handles when known and share only with audiences cleared at the [named+specifics] bar",
-      "**Data retention / declassification**: None configured",
-      "**Sensitive remote targets**: any namespace, host, or container whose name carries `prod` or `production` as a whole word or name segment",
-      "**Protected deployment namespaces / environments**: None configured — fall back to the Sensitive remote targets heuristic",
-      "**Protected IaC scopes**: IAM, RBAC, networking, quota, and node-pool resources; anything whose name or tag carries `prod` or `production` as a whole word or name segment",
-      "### User-specific",
-      "**Primary use of Claude Code**: software development (this repo, invio v3, bugfix-only; new features go to a separate INVIO 4 repo)",
-      "**Trusted repo**: D:\\dev\\csgroup\\invio (working directory), remote gitlab.cs-group.de:consulting/invio.git — assumed private; confidential material OK to commit/push here, but secrets and sensitive personal/entrusted data are never cleared in regardless of visibility",
-      "**Org-specific CLIs**: None configured — `glab` seen in usage but not corroborated as org-specific beyond generic GitLab CLI use",
-      "routine under D:\\dev\\csgroup\\invio\\ prefix: git flow release steps (changelog/release-notes edits, squash merge develop→main, tagging, branch push/delete) as documented in repo CLAUDE.md"
-    ]
-  },
-  "modelSettings": {
-    "claude-opus-5-5": {
-      "autoCompactWindow": 400000
-    }
+  "feedbackDrafts": "notify",
+  "awaySummaryEnabled": false,
+  "prefersReducedMotion": true,
+  "timeFormat": "auto",
+  "autoCompactEnabled": false,
+  "idleCompaction": false,
+  "switchModelsOnFlag": true,
+  "autoContinueAtUsageLimit": false,
+  "fileCheckpointingEnabled": false,
+  "attribution": {
+    "commit": "",
+    "pr": "",
+    "sessionUrl": false
   }
 }

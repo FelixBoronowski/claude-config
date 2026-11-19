@@ -1,6 +1,6 @@
 ---
 name: test-runner
-description: Runs checks and reports results — test suites, single test files, typechecks, lints, builds. Use whenever the only job is to execute a check and report pass/fail (e.g. the verification steps in /implement or /tdd, or "is everything still green?" before a commit), never to write or fix code.
+description: Runs checks and reports results — test suites, single test files, typechecks, lints, builds. Use whenever the only job is to execute a check and report pass/fail (e.g. the verification steps in /tdd, or "is everything still green?" before a commit), never to write or fix code.
 model: haiku
 tools: Bash, Read, Grep, Glob
 maxTurns: 25
