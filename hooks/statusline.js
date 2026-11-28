@@ -333,8 +333,9 @@ function buildUsageFromStdin(data) {
   };
 
   const fiveHour = toEntry(rl.five_hour);
-  if (!fiveHour) return null;          // five_hour is the required bar
-  return { fiveHour, weekly: toEntry(rl.seven_day), models: [] };
+  const weekly = toEntry(rl.seven_day);
+  if (!fiveHour && !weekly) return null;
+  return { fiveHour, weekly, models: [] };
 }
 
 // /usage response body -> { fiveHour, weekly, models }, or null on unparseable JSON or a
@@ -827,11 +828,7 @@ function resolveUsage(data, callback) {
   }
   const fromStdin = buildUsageFromStdin(data);
   if (fromStdin) {
-    // Scoped limits only exist in the API payload -> fetch from cache; a failed/slow call
-    // costs only those bars, never the H/W bars stdin already gave us.
-    return getRawUsage((cached) => {
-      callback(buildUsageBars({ ...fromStdin, models: cached?.models || [] }));
-    });
+    return callback(buildUsageBars(fromStdin));
   }
   getRawUsage((raw) => callback(raw ? buildUsageBars(raw) : null));
 }

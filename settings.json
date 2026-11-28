@@ -105,6 +105,10 @@
     "type": "command",
     "command": "node \"${USERPROFILE:-$HOME}/.claude/hooks/statusline.js\""
   },
+  "subagentStatusLine": {
+    "type": "command",
+    "command": "node \"${USERPROFILE:-$HOME}/.claude/hooks/statusline.js\" subagent"
+  },
   "enabledPlugins": {
     "mattpocock-skills@claude-plugins-official": true,
     "ponytail@ponytail": true
